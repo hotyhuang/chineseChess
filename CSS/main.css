@@ -1,0 +1,3 @@
+@CHARSET "UTF-8";
+p:nth-child(odd){color:blue;}
+p:nth-child(even){color:red;}

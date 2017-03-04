@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Five In A Row</title>
+<style type="text/css">
+#chess{
+	border: 2px solid #000000;
+	background: #FFCC99;
+}
+h4#blackTurn{
+	position: absolute;
+	left: 850px;
+	top: 330px;
+	color: red;
+}
+h4#whiteTurn{
+	position: absolute;
+	left: 850px;
+	top: 360px;
+}
+button#switch{
+	position: absolute;
+	left: 850px;
+	top: 300px;
+}
+button#refresh{
+	position: absolute;
+	left: 850px;
+	top: 500px;
+}
+</style>
+
+</head>
+<body>
+	<canvas id="chess" width="800" height="600"></canvas>
+	<button id="refresh" onclick="refresh()">Refresh</button>
+	<button id="switch" onclick="switchFirst()">Switch Starter</button>
+	<h4 id="blackTurn">Black Turn: <span id="blackStep">0</span> </h4><br>
+	<h4 id="whiteTurn">White Turn: <span id="whiteStep">0</span></h4>
+	<script type="text/javascript">
+		var n=16; //chess divides + 2
+		var s=n-2; //size of array
+		var c = document.getElementById("chess");
+		var blackTurn = document.getElementById("blackTurn");
+		var whiteTurn = document.getElementById("whiteTurn");
+		var width=parseInt(c.getAttribute("width"));
+		var height=parseInt(c.getAttribute("height"));
+		
+		var nW=width/n;
+		var nH=height/n;
+		
+		var blackCount = 0;
+		var whiteCount = 0;
+		var blackStep = document.getElementById("blackStep");
+		var whiteStep = document.getElementById("whiteStep");
+		
+		var radius=Math.min(nW/3, nH/3);
+		var ctx = c.getContext("2d");
+		
+		function drawLines(){
+			ctx.beginPath();
+			for(var i=1;i<n;i++){
+				ctx.moveTo(nW, i*nH);
+				ctx.lineTo(width-nW, i*nH);
+				ctx.stroke();
+				
+				ctx.moveTo(i*nW, nH);
+				ctx.lineTo(i*nW, height-nH);
+				ctx.stroke();
+			}
+		}
+		
+		drawLines();
+		
+		var rect = c.getBoundingClientRect();
+		//alert("top: "+ rect.top +", right: " + rect.right +", bottom: " + rect.bottom +", left: " +  rect.left);
+		
+		c.addEventListener("click", drawArc);
+		
+		var black = 1;
+		
+		var array = [];
+		refreshArray();
+		
+		function refreshArray(){
+			for(var i=0;i<(n-1);i++){
+				array[i] = [];
+				for(var j=0;j<(n-1);j++){
+					array[i][j] = 0;
+				}
+			}
+		}
+		
+		
+		function drawArc(){
+			
+			var x=event.pageX;
+			var y=event.pageY;
+			
+			var absX = x - rect.left - nW - 2;    //2 is border width, yet to find way to get it
+			var absY = y - rect.top - nH -2;
+			
+			var nX = Math.round(absX/nW);
+			var nY = Math.round(absY/nH);
+			
+			var relativeX = nX * nW;
+			var relativeY = nY * nH;
+			
+			var cX = absX - relativeX;
+			var cY = absY - relativeY;
+			var cC = Math.sqrt(Math.pow(cX,2) + Math.pow(cY,2));
+			
+			if(cC <= radius && array[nX][nY] == 0){
+				ctx.beginPath();
+				ctx.arc(relativeX+nW, relativeY+nH, radius, 0, 2*Math.PI);
+				if(black == 1){
+					ctx.fillStyle="black";
+				}else{
+					ctx.fillStyle="white";
+				}
+				array[nX][nY] = black;
+				ctx.fill();
+				
+				stepCount();
+				
+				checkWinner(nX, nY);
+				
+				black = -black;
+				checkTurn();
+				
+			}
+			
+			if(blackCount > 0 || whiteCount > 0){
+				document.getElementById("switch").disabled = true;
+			}
+		}
+		
+		function checkWinner(nX, nY){
+			checkHorizontal(nX, nY);
+			checkVertical(nX, nY);
+			checkDiagonal_1(nX, nY);
+			checkDiagonal_2(nX, nY);
+		}
+		
+		function checkHorizontal(nX, nY){
+			var count = 1;
+			if(nX < s){
+				var rightX = nX + 1;
+				
+				while(rightX <= s && array[rightX][nY] == black){
+					count++;
+					rightX++;
+				}
+			}
+			
+			if(nX > 0){
+				var leftX = nX - 1;
+				while(leftX >= 0 && array[leftX][nY] == black){
+					count++;
+					leftX--;
+				}
+			}
+			
+			typeWinner(count);
+		}
+		
+		function checkVertical(nX, nY){
+			var count = 1;
+			if(nY < s){
+				var downY = nY + 1;
+				while(downY <= s && array[nX][downY] == black){
+					count++;
+					downY++;
+				}
+			}
+			if(nY > 0){
+				var upY = nY - 1;
+				while(upY >= 0 && array[nX][upY] == black){
+					count++;
+					upY--;
+				}
+			}
+			typeWinner(count);
+		}
+		
+		function checkDiagonal_1(nX, nY){
+			var count = 1;
+			if(nX < s && nY < s){
+				var rightX = nX + 1;
+				var downY = nY + 1;
+				while(rightX <= s && downY <= s && array[rightX][downY] == black){
+					count++;
+					rightX++;
+					downY++;
+				}
+			}
+			if(nX > 0 && nY > 0){
+				var leftX = nX - 1;
+				var upY = nY - 1;
+				while(leftX >= 0 && upY >= 0 && array[leftX][upY] == black){
+					count++;
+					leftX--;
+					upY--;
+				}
+			}
+			typeWinner(count);
+		}
+		
+		function checkDiagonal_2(nX, nY){
+			var count = 1;
+			if(nX > 0 && nY < s){
+				var leftX = nX - 1;
+				var downY = nY + 1;
+				while(leftX >= 0 && downY <= s && array[leftX][downY] == black){
+					count++;
+					leftX--;
+					downY++;
+				}
+			}
+			if(nX < s && nY > 0){
+				var rightX = nX + 1;
+				var upY = nY - 1;
+				while(rightX <= s && upY >= 0 && array[rightX][upY] == black){
+					count++;
+					rightX++;
+					upY--;
+				}
+			}
+			typeWinner(count);
+		}
+		
+		function typeWinner(count){
+			if(count == 5){
+				var winner;
+				if(black == 1){
+					winner = "Black";
+				}else if(black == -1){
+					winner = "White";
+				}
+				alert(winner + " is winner!");
+				refresh();
+			}
+		}
+		
+		function refresh(){
+			ctx.fillStyle="#FFCC99";
+			ctx.fillRect(0, 0, width, height);
+			drawLines();
+			refreshArray();
+			
+			blackCount = 0;
+			whiteCount = 0;
+			blackStep.innerHTML = blackCount;
+			whiteStep.innerHTML = whiteCount;
+			
+			document.getElementById("switch").disabled = false;
+		}
+		
+		function switchFirst(){
+			black = -black;
+			checkTurn();
+		}
+		
+		function checkTurn(){
+			if(black == 1){
+				blackTurn.style.color = "red";
+				whiteTurn.style.color = "black";
+			}else{
+				blackTurn.style.color = "black";
+				whiteTurn.style.color = "red";
+			}
+		}
+		
+		function stepCount(){
+			if(black == 1){
+				blackCount++;
+				blackStep.innerHTML = blackCount;
+			}else{
+				whiteCount++;
+				whiteStep.innerHTML = whiteCount;
+			}
+		}
+		
+	</script>
+</body>
+</html>

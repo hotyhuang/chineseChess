@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="JQuery/jquery.js"></script>
+
+<style type="text/css">
+#loginbox{
+	width: 240px;
+	height: 140px;
+	margin: 0px auto;
+	margin-top: 300px;
+}
+
+</style>
+
+</head>
+<body>
+<div id="loginbox">
+	<input id="username" type="text" placeholder="your username..." />
+	<br>
+	<input id="password" type="text" placeholder="your password..." />
+	<br>
+	<button>Sign in</button>
+</div>
+<br>
+<div id="container"></div>
+
+<script type="text/javascript">
+$("button").click(function(){
+	/* $.get("Text.html",function(data){
+		$("#container").html(data);
+	}) */
+	
+	/* var username=$("#username").val();
+	var password=$("#password").val();
+	$.post("server.php",{login:username, password:password, function(data){
+			if(data !="Wrong login"){
+				$("#loginbox").fadeOut();
+				$("#container").html(data);
+			}else{}
+		}
+	}); */
+	
+	$.ajax({
+		type: 'POST',
+		url: 'server.php',
+		data: {
+			'login': username,
+			'password': password
+		},
+		
+		success: function(data){
+			alert(data);
+		}
+	})
+});
+
+</script>
+
+
+
+</body>
+</html>

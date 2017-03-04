@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Let's play chess!</title>
+<script type="text/javascript" src="JQuery/jquery.js"></script>
+<script type="text/javascript" src="JQuery/jquery-ui.js"></script>
+<style type="text/css">
+div.selected{
+	border: 2px solid #0000FF;
+}
+</style>
+
+</head>
+<body>
+	<div id="table">
+		<img id="chessTable" alt="Chinese Chess" src="chessImg/ChineseChess.JPG" width="700" height="600">
+		<div id="red_a" class="a1"><img alt="帅" src="chessImg/a.jpg"></div>
+		<div id="red_b1" class="b1"><img alt="仕" src="chessImg/b.jpg"></div>
+		<div id="red_b2" class="b1"><img alt="仕" src="chessImg/b.jpg"></div>
+		<div id="red_c1" class="c1"><img alt="相" src="chessImg/c.jpg"></div>
+		<div id="red_c2" class="c1"><img alt="相" src="chessImg/c.jpg"></div>
+		<div id="red_d1" class="d1"><img alt="俥" src="chessImg/d.jpg"></div>
+		<div id="red_d2" class="d1"><img alt="俥" src="chessImg/d.jpg"></div>
+		<div id="red_e1" class="e1"><img alt="傌" src="chessImg/e.jpg"></div>
+		<div id="red_e2" class="e1"><img alt="傌" src="chessImg/e.jpg"></div>
+		<div id="red_f1" class="f1"><img alt="炮" src="chessImg/f.jpg"></div>
+		<div id="red_f2" class="f1"><img alt="炮" src="chessImg/f.jpg"></div>
+		<div id="red_g1" class="g1"><img alt="兵" src="chessImg/g.jpg"></div>
+		<div id="red_g2" class="g1"><img alt="兵" src="chessImg/g.jpg"></div>
+		<div id="red_g3" class="g1"><img alt="兵" src="chessImg/g.jpg"></div>
+		<div id="red_g4" class="g1"><img alt="兵" src="chessImg/g.jpg"></div>
+		<div id="red_g5" class="g1"><img alt="兵" src="chessImg/g.jpg"></div>
+		<div id="trace"></div>
+		
+		<div id="black_a" class="a2"><img alt="将" src="chessImg/aa.jpg"></div>
+		<div id="black_b1" class="b2"><img alt="士" src="chessImg/bb.jpg"></div>
+		<div id="black_b2" class="b2"><img alt="士" src="chessImg/bb.jpg"></div>
+		<div id="black_c1" class="c2"><img alt="象" src="chessImg/cc.jpg"></div>
+		<div id="black_c2" class="c2"><img alt="象" src="chessImg/cc.jpg"></div>
+		<div id="black_d1" class="d2"><img alt="车" src="chessImg/dd.jpg"></div>
+		<div id="black_d2" class="d2"><img alt="车" src="chessImg/dd.jpg"></div>
+		<div id="black_e1" class="e2"><img alt="马" src="chessImg/ee.jpg"></div>
+		<div id="black_e2" class="e2"><img alt="马" src="chessImg/ee.jpg"></div>
+		<div id="black_f1" class="f2"><img alt="包" src="chessImg/ff.jpg"></div>
+		<div id="black_f2" class="f2"><img alt="包" src="chessImg/ff.jpg"></div>
+		<div id="black_g1" class="g2"><img alt="卒" src="chessImg/gg.jpg"></div>
+		<div id="black_g2" class="g2"><img alt="卒" src="chessImg/gg.jpg"></div>
+		<div id="black_g3" class="g2"><img alt="卒" src="chessImg/gg.jpg"></div>
+		<div id="black_g4" class="g2"><img alt="卒" src="chessImg/gg.jpg"></div>
+		<div id="black_g5" class="g2"><img alt="卒" src="chessImg/gg.jpg"></div>
+	</div>
+	
+	<button onclick="refresh()">Play Again</button>
+	<script type="text/javascript">
+	// a---帅  	b---仕  	c---相  	d---俥  	e---傌  	f---炮  	g---兵
+	// aa--将 	bb--士 	cc--象 	dd--车 	ee--马 	ff--包 	gg--卒
+		
+	
+		//initialize the variables
+		var chessTable = $("img#chessTable");
+		var trace = $("div#trace");
+	
+		var width = chessTable.width();
+		var height = chessTable.height();
+		
+		var gridWidth = width * (600/700) / 8;
+		var gridHeight = height * (600/700) / 9;
+		var radius = Math.min(gridWidth, gridHeight) / 2.25;
+		
+		var selectedChessman = null;
+		var lastChessman =null;
+		
+		var myTurn = 1;
+		var moved = false;
+		
+		var rect = chessTable.offset();
+		var leftPosition = rect.left + width*(50/700) - radius;
+		var topPosition = rect.top + height*(50/700) -radius;
+		
+		//select the tags of Red and Black
+		var theRed = $("div[id^='red']");
+		var theBlack = $("div[id^='black']");
+		
+		
+		//define the putChess function to put a chessman to a specific grid
+		(function($) {
+			$.fn.putChess = function(nX, nY)
+			{
+				if(typeof nY !== "undefined"){
+					return $(this).css({"left" : leftPosition + (nX * gridWidth), "top" : topPosition + (nY * gridHeight)});
+				}else{
+					return $(this).css({"left": nX.offset().left, "top": nX.offset().top});
+				}
+			}
+		})(jQuery);
+		
+		//define toGrid function, transfer (x, y) to (nX, nY), and get the distance to the closest point
+		function toGrid(x, y){
+			var absX = x - (leftPosition + radius);
+			var absY = y - (topPosition + radius);
+			
+			var gridX = Math.round(absX / gridWidth);
+			var gridY = Math.round(absY / gridHeight);
+			
+			var cX = absX - (gridX * gridWidth);
+			var cY = absY - (gridY * gridHeight);
+			var distance = Math.sqrt(Math.pow(cX, 2) + Math.pow(cY, 2));
+			return{
+				nX: gridX,
+				nY: gridY,
+				cC: distance
+			};
+		}
+		
+		
+		//define the getPosition function to look up the position of a chessman
+		(function($) {
+			$.fn.getPosition = function()
+			{
+				var offset = $(this).offset()
+				var gridPosition = toGrid(offset.left, offset.top);
+				return {
+					nX: gridPosition.nX,
+					nY: gridPosition.nY
+				};
+			}
+		})(jQuery);
+		
+		//set the css attribute of each chessman
+		$("img:not(#chessTable)").css({
+			"width": 2*radius,
+			"height": 2*radius,
+			"border-radius": radius,
+			"position": "absolute"
+		});
+		$("div:not(#table)").css({
+			"width": 2*radius,
+			"height": 2*radius,
+			"position": "absolute"
+		})
+		
+		
+		//initialize the chess table by 9 columns, 10 rows
+		//set numbers stand for each chessman: 7---帅  	6---仕  	5---相   	4---马  	3---车	2---炮  	1---兵
+		var array = [];
+		
+		function refreshArray(){
+			for(var i=0;i<9;i++){
+				array[i] = [];
+				for(var j=0;j<10;j++){
+					array[i][j] = 0;
+				}
+			}
+			
+			for(var i=0;i<4;i++){
+				array[i][0] = -(i+3);
+				array[8-i][0] = -(i+3);
+				array[i][9] = i+3;
+				array[8-i][9] = i+3;
+			}
+			array[4][0] = -7;
+			array[4][9] = 7;
+			
+			for(var j=0;j<5;j++){
+				array[2*j][3] = -1;
+				array[2*j][6] = 1;
+			}
+			array[1][2] = -2;
+			array[7][2] = -2;
+			array[1][7] = 2;
+			array[7][7] = 2;
+		}
+		
+		
+		//set the initial position of each chessman
+		
+		function refreshTable(){
+			theRed.show();
+			theBlack.show();
+			
+			var str = "decb";
+			
+			for(var i=0; i<str.length; i++){
+				$("div#red_" + str[i] + "1").putChess(i, 9);
+				$("div#red_" + str[i] + "2").putChess(8-i, 9);
+				
+				$("div#black_" + str[i] + "1").putChess(i, 0);
+				$("div#black_" + str[i] + "2").putChess(8-i, 0);
+			}
+			
+			$("div#red_a").putChess(4, 9);
+			$("div#red_f1").putChess(1, 7);
+			$("div#red_f2").putChess(7, 7);
+			
+			$("div#black_a").putChess(4, 0);
+			$("div#black_f1").putChess(1, 2);
+			$("div#black_f2").putChess(7, 2);
+			
+			for(var j=0; j<5; j++){
+				$("div#red_g"+(j+1)).putChess(2*j, 6);
+				$("div#black_g"+(j+1)).putChess(2*j, 3);
+			}
+			
+		}
+		
+		function refresh(){
+			refreshArray();
+			refreshTable();
+			myTurn = 1;
+			
+			erase();
+			selectedChessman = null;
+			
+			runs();
+		}
+		
+		refresh();
+		
+		
+		//click on each chessman
+		function select(e) {
+			erase();
+			
+			e.stopImmediatePropagation()
+			
+			selectedChessman = $(this);
+			lastChessman = $(this);
+			
+			selectedChessman.addClass("selected");
+			
+			moved = false;
+		};
+
+		function erase(){
+			if (selectedChessman != null) {
+				selectedChessman.removeClass("selected");
+			}else if(lastChessman != null){
+				lastChessman.removeClass("selected");
+				lastChessman = null;
+				
+				trace.removeClass("selected");
+				trace.css({"left": "auto", "top": "auto"});
+			}
+		}
+		
+		//Make the game runs
+		function runs(){
+			if(myTurn == 1){
+				theRed.off("click", toBeEaten);
+				theRed.on("click", select);
+				theBlack.off("click", select);
+				theBlack.on("click", toBeEaten);
+			}else{
+				theBlack.off("click", toBeEaten);
+				theBlack.on("click", select);
+				theRed.off("click", select);
+				theRed.on("click", toBeEaten);
+			}
+			
+		}
+		
+		
+		$(runs);
+		
+		//is triggered if a chessman moves over the opponents chessman
+		function toBeEaten(){
+			if(selectedChessman == null){
+				return;
+			}
+			
+			move();
+			
+			if(moved){
+				var lost = $(this);
+				lost.hide();
+				
+				if(lost.is($("div#red_a"))){
+					alert("Black dominates!");
+					refresh();
+				}
+				if(lost.is($("div#black_a"))){
+					alert("Red is GODLIKE!");
+					refresh();
+				}
+			}
+			
+		}
+		
+		//click on the chessTable to move the chessman
+		chessTable.on("click", move);
+		
+		//define the move function
+		function move() {
+			
+			if(selectedChessman == null){
+				return;
+			}
+			
+			
+			var x = event.pageX;
+			var y = event.pageY;
+
+			var gridPosition = toGrid(x, y);
+
+			var targetX = gridPosition.nX;
+			var targetY = gridPosition.nY;
+
+			if (targetX<0 || targetY<0 || targetX>8 || targetY > 9) {
+				selectedChessman.removeClass("selected");
+				selectedChessman = null;
+				return;
+			}
+			
+			if( !moveMethod(selectedChessman, targetX, targetY) ){
+				selectedChessman.removeClass("selected");
+				selectedChessman = null;
+				return;
+			}
+			
+			
+			if (gridPosition.cC <= radius) {
+				//get the trace and show it after the movement
+				
+				trace.putChess(selectedChessman);
+				trace.addClass("selected");
+
+				//switch the value in array
+				var chessmanPosition = selectedChessman.getPosition();
+				var nX = chessmanPosition.nX;
+				var nY = chessmanPosition.nY;
+				
+				var chessmanValue = array[nX][nY];
+				array[targetX][targetY] = chessmanValue;
+				array[nX][nY] = 0;
+				
+				//move the chessman to the target position
+				selectedChessman.putChess(targetX, targetY);
+				moved = true;
+				
+				//switch turns and click event
+				myTurn = -myTurn;
+				runs();
+			}else{
+				selectedChessman.removeClass("selected");
+			}
+			
+			selectedChessman = null;
+		}
+		
+		
+		//return true if the chessman can be moved to the target position
+		function moveMethod(chessman, targetX, targetY){
+			var nX = chessman.getPosition().nX;
+			var nY = chessman.getPosition().nY;
+			
+			var step = chessman.prop("class").slice(0,2) + "Step(targetX, targetY, nX, nY)";
+			
+			return eval(step);
+		}
+		
+	
+		
+	//define the functions for the stepping of each chessman
+	
+		//for Car
+		function d1Step(targetX, targetY, nX, nY){
+			if(nX == targetX){
+				var deltaY = (targetY - nY)>0 ? 1 : -1;
+				nY +=deltaY;
+				while(nY != targetY){
+					
+					if(array[nX][nY] != 0){
+						return false;
+					}
+					nY += deltaY;
+				}
+			}else if(nY == targetY){
+				var deltaX = (targetX - nX)>0 ? 1 : -1;
+				nX +=deltaX;
+				while(nX != targetX){
+					
+					if(array[nX][nY] != 0){
+						return false;
+					}
+					nX += deltaX;
+				}
+			}else return false;
+			
+			return true;
+		}
+		
+		var d2Step = d1Step;
+		
+		
+		//for Cannon
+		function f1Step(targetX, targetY, nX, nY){
+			var count = 0;
+			
+			if(nX == targetX){
+				var deltaY = (targetY - nY)>0 ? 1 : -1;
+				
+				while(nY != targetY){
+					nY +=deltaY;
+					if(array[nX][nY] != 0){
+						count++;
+					}
+				}
+				
+				if(count==1 || count>2)
+					return false;
+			}else if(nY == targetY){
+				var deltaX = (targetX - nX)>0 ? 1 : -1;
+				
+				while(nX != targetX){
+					nX +=deltaX;
+					if(array[nX][nY] != 0){
+						count++;
+					}
+				}
+				
+				if(count==1 || count>2)
+					return false;
+			}else return false;
+			
+			return true;
+		}
+		
+		var f2Step = f1Step;
+		
+		
+		//for the Horse
+		function pointMove(delta){
+			
+			for(var i=1; i<arguments.length; i++){
+				if(delta[0] == arguments[i][0] && delta[1] == arguments[i][1])
+					return i;
+			}
+			return 0;
+		}
+		
+		function pointBlock(nP, move){
+			
+			if( move < 2)
+				return false;
+			
+			if(array[nP[0] + arguments[move][0]][nP[1] + arguments[move][1]] != 0)
+				return false;
+			
+			return true;
+			
+		}
+		
+		function e1Step(targetX, targetY, nX, nY){
+			var deltaX = targetX - nX;
+			var deltaY = targetY - nY;
+			
+			var move = pointMove([deltaX, deltaY], [2,1], [2,-1], [-2,1], [-2,-1], [1,2], [-1,2], [1,-2], [-1,-2]); 
+			
+			return pointBlock([nX, nY], (Math.ceil(move/2)+1), [1,0], [-1,0],  [0,1], [0,-1]);
+		}
+		
+		var e2Step = e1Step;
+		
+		
+		//for Elephant
+		function elephantBehavior(targetX, targetY, nX, nY){
+			var deltaX = targetX - nX;
+			var deltaY = targetY - nY;
+			
+			var move = pointMove([deltaX, deltaY], [2,2], [2,-2], [-2,2], [-2,-2]);
+			
+			return pointBlock([nX, nY], (move+1), [1,1], [1,-1], [-1,1], [-1,-1]);
+		}
+		
+		function c1Step(targetX, targetY, nX, nY){
+			if(targetY < 5)
+				return false;
+			
+			return elephantBehavior(targetX, targetY, nX, nY)
+		}
+		
+		function c2Step(targetX, targetY, nX, nY){
+			if(targetY > 4)
+				return false;
+			return elephantBehavior(targetX, targetY, nX, nY)
+		}
+		
+		
+		//for Officer
+		function officerBehavior(targetX, targetY, nX, nY){
+			var deltaX = targetX - nX;
+			var deltaY = targetY - nY;
+			
+			var move = pointMove([deltaX, deltaY], [1,1], [1,-1], [-1,1], [-1,-1]);
+			
+			if(move != 0)
+				return true;
+			else return false;
+		}
+		
+		function b1Step(targetX, targetY, nX, nY){
+			if(targetX < 3 || targetX > 5)
+				return false;
+			if(targetY < 7)
+				return false;
+			return officerBehavior(targetX, targetY, nX, nY);
+		}
+		
+		function b2Step(targetX, targetY, nX, nY){
+			if(targetX < 3 || targetX > 5)
+				return false;
+			if(targetY > 2)
+				return false;
+			return officerBehavior(targetX, targetY, nX, nY);
+		}
+		
+		
+		//for the King
+		function kingBehavior(targetX, targetY, nX, nY){
+			var deltaX = targetX - nX;
+			var deltaY = targetY - nY;
+			
+			var move = pointMove([deltaX, deltaY], [1,0], [-1,0], [0,1], [0,-1]);
+			
+			if(move != 0)
+				return true;
+			else return false;
+		}
+		
+		function a1Step(targetX, targetY, nX, nY){
+			if(array[targetX][targetY] == -7 && targetX == nX){
+				
+				nY -= 1;
+				while(nY != targetY){
+					if(array[nX][nY] != 0){
+						return false;
+					}
+					nY -= 1;
+				}
+				return true;
+			}
+			
+			if(targetX < 3 || targetX > 5)
+				return false;
+			if(targetY < 7)
+				return false;
+			return kingBehavior(targetX, targetY, nX, nY);
+		}
+		
+		function a2Step(targetX, targetY, nX, nY){
+			if(array[targetX][targetY] == 7 && targetX == nX){
+				nY += 1;
+				while(nY != targetY){
+					if(array[nX][nY] != 0){
+						return false;
+					}
+					nY += 1;
+				}
+				return true;
+			}
+			
+			if(targetX < 3 || targetX > 5)
+				return false;
+			if(targetY > 2)
+				return false;
+			return kingBehavior(targetX, targetY, nX, nY);
+		}
+		
+		
+		//for the Footman
+		function g1Step(targetX, targetY, nX, nY){
+			var deltaX = targetX - nX;
+			var deltaY = targetY - nY;
+			
+			if(nY > 4){
+				var move = pointMove([deltaX, deltaY], [0,-1]);
+				if(move != 0)
+					return true;
+				else return false;
+			}else{
+				var move = pointMove([deltaX, deltaY], [0,-1], [1,0], [-1,0]);
+				if(move != 0)
+					return true;
+				else return false;
+			}
+		}
+		
+		function g2Step(targetX, targetY, nX, nY){
+			var deltaX = targetX - nX;
+			var deltaY = targetY - nY;
+			
+			if(nY < 5){
+				var move = pointMove([deltaX, deltaY], [0,1]);
+				if(move != 0)
+					return true;
+				else return false;
+			}else{
+				var move = pointMove([deltaX, deltaY], [0,1], [1,0], [-1,0]);
+				if(move != 0)
+					return true;
+				else return false;
+			}
+		}
+		
+	</script>
+</body>
+</html>

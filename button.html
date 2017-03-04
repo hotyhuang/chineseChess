@@ -1,0 +1,46 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="JQuery/jquery.js"></script>
+
+<style type="text/css">
+	.big{
+		font-size:20px;
+	}
+	.small{
+		font-size:15px;
+	}
+	#green{
+		color:green;
+	}
+</style>
+</head>
+<body>
+<script type="text/javascript">
+	$(function(){
+		$(".big").css("font-size","40px");
+		$(".big").css("color","red");
+		
+		$("#green").click(function(){
+			$("button:not(.small)").toggle();
+			//$(".big").hide();
+			$(this).css("color","yellow");
+			$(this).css("font-size","40px");
+		});
+	});
+</script>
+
+
+<button class="big">Button 1</button>
+<button class="big">Button 1.1</button>
+<button class="big">Button 1.2</button>
+<button id="green" class="small">Button 2</button>
+
+<!-- <script type="text/javascript">
+	$("#green").hide();
+</script> -->
+
+</body>
+</html>

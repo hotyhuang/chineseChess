@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="JQuery/jquery.js"></script>
+<script type="text/javascript" src="JQuery/jquery-ui.js"></script>
+<script type="text/javascript" src="JQuery/script2.js"></script>
+<script type="text/javascript" src="JQuery/filter.js"></script>
+
+
+<link rel="stylesheet" type="text/css" href="CSS/style2.css">
+</head>
+<body>
+
+	<div id="header">
+		<div id="menu">
+			<h2>jQuery Portfolio</h2>
+			<input id="search" type="text" placeholder="search..." style="float: right;">
+		</div>
+	</div>
+	<div id="overlay"></div>
+	<div id="frame">
+	
+		<table id="frame-table">
+			<tr>
+				<td id="left"><img alt="left" src="images/left.png"></td>
+				<td id="right"><img alt="right" src="images/right.png"></td>
+				
+			</tr>
+		</table>
+		<img id="main" alt="" src="" />
+		<div id="description">
+			<p></p>
+		</div>
+	</div>
+	<div id="wrapper">
+		<ul id="filter">
+			<li class="active">all</li>
+			<li>dark</li>
+			<li>light</li>
+			<li>cloud</li>
+		</ul>
+	
+		<ul id="portfolio">
+			<li data-keywords="sunset" class="all cloud"><img id="1" alt="img" src="images/1.jpg"></li>
+			<li data-keywords="arc sunny" class="all light"><img id="2" alt="img" src="images/2.jpg"></li>
+			<li data-keywords="clouds mirror" class="all cloud"><img id="3" alt="img" src="images/3.jpg"></li>
+			<li data-keywords="dark snow" class="all dark"><img id="4" alt="img" src="images/4.jpg"></li>
+			<li data-keywords="mirror lights clouds" class="all dark cloud"><img id="5" alt="img" src="images/5.jpg"></li>
+		</ul>
+	</div>
+
+</body>
+</html>
