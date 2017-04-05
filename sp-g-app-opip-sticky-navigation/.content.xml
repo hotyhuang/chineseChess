@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:description="This component is used on App Opip pages for sticky navigation"
+    jcr:primaryType="cq:Component"
+    jcr:title="App OPIP Sticky Navigation"
+    allowedParents="[*/parsys]"
+    componentGroup="Samsung - Support Component"/>

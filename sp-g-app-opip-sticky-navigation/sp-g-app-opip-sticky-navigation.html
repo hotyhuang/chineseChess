@@ -1,0 +1,20 @@
+<sly data-sly-use.data="/apps/samsung/components/page/page/sitecode.js"/> 
+<sly data-sly-use.appProductHeroSightly="${'com.samsung.support.global.sightly.AppProductHeroSightly'}"/>
+<sly data-sly-test.appProductHeroModel="${appProductHeroSightly.appProductHeroModel}"></sly>
+
+<p data-sly-test="${(wcmmode.edit ||wcmmode.design)&& !appProductHeroModel.appTitle}">Click here to edit the AppOPIP Sticky Navigation</p>
+<div class="sp-g-app-opip-sticky-navigation__container__outer">
+	<div class="sp-g-app-opip-sticky-navigation__container">
+	    <div class="sp-g-app-opip-sticky-navigation__container__wrap">
+	    	<div class="sp-g-app-opip-sticky-navigation__container__title">
+	    		${appProductHeroModel.appTitle}
+	    	</div>
+	    	<span class="sp-g-app-opip-sticky-navigation__container__icon__down"></span>
+	    	<ul class="sp-g-app-opip-sticky-navigation__container__ul">
+			</ul>
+	    </div>
+	    
+		<div class="sp-g-app-opip-sticky-navigation__container__underline"></div>
+	</div>
+</div>
+<div class="sp-g-app-opip-sticky-navigation__container__placeholder"></div>
